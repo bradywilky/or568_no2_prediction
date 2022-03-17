@@ -1,0 +1,4 @@
+start chrome "https://drivendata-prod.s3.amazonaws.com/data/91/public/airathon_download_instructions_no2_lbOmDSn.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIARVBOBDCYZDRLDSRZ%2F20220317%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220317T140946Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=bf8bf86d34f69abac34f0016aa378f9089c2481ba019336b5b250a7ec1305cd1"
+start chrome "https://docserver.gesdisc.eosdis.nasa.gov/repository/Mission/OMI/3.3_ScienceDataProductDocumentation/3.3.2_ProductRequirements_Designs/README.OMI_DUG.pdf"
+start chrome "https://cmr.earthdata.nasa.gov/search/concepts/C1266136111-GES_DISC.html"
+start chrome "https://www.drivendata.org/competitions/91/competition-air-quality-no2/page/435/"
