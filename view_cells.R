@@ -11,7 +11,7 @@ data <- nc_open(get.omi.datapath('2020', '07', '01'))
 
 library(sf)
 library(mapview)
-setwd("~/repositories/public_sonbox/or568_no2_prediction")
+setwd("~/repositories/or568_no2_prediction")
 
 grid.metadata <- read.csv('data/grid_metadata.csv')
 la_grid <- grid.metadata[grid.metadata$location == 'Los Angeles (SoCAB)',]

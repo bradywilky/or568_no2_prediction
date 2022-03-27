@@ -2,15 +2,13 @@ library(magrittr) # used only to import the operator %>%
 library(stringr) # for various character vector operations
 
 
-train_labels <- read.csv("~/repositories/public_sonbox/or568_term_project/data/train_labels.csv")
-grid_meta <- read.csv("~/repositories/public_sonbox/or568_term_project/data/grid_metadata.csv")
-
-x <- grid_meta$wkt[1]
+train_labels <- read.csv("~/repositories/or568_no2_prediction/data/train_labels.csv")
+grid_meta <- read.csv("~/repositories/or568_no2_prediction/data/grid_metadata.csv")u
 
 grid_meta$temp <- grid_meta$wkt %>% str_remove(
-  'POLYGON \\(\\(') %>% str_remove(
-    '\\)\\)') %>% str_remove_all(
-      ',') %>% strsplit(split=' ')
+  "POLYGON \\(\\(") %>% str_remove(
+    "\\)\\)") %>% str_remove_all(
+      ",") %>% strsplit(split=" ")
 
 i_lon <- c(1,3,5,7)
 i_lat <- c(2,4,6,8)
@@ -37,16 +35,16 @@ grid_meta$min_lon <- min_lon
 # these columns should be the geometric center of the grid, representing its
 # unofficial coordinate point. Can be used to join data with latitude and
 # longitude.
-grid_meta$mid_lat <- rowMeans(grid_meta[,c('max_lat', 'min_lat')], na.rm=TRUE)
-grid_meta$mid_lon <- rowMeans(grid_meta[,c('max_lon', 'min_lon')], na.rm=TRUE)
+grid_meta$mid_lat <- rowMeans(grid_meta[,c("max_lat", "min_lat")], na.rm=TRUE)
+grid_meta$mid_lon <- rowMeans(grid_meta[,c("max_lon", "min_lon")], na.rm=TRUE)
 
 # creating and saving grid_meta transformed
 grid_meta_trns <- grid_meta %>% subset(select = -c(temp, wkt))
-path <- ("~/repositories/public_sonbox/or568_term_project/data/grid_meta_trns.csv")
+path <- ("~/repositories/or568_no2_prediction/data/grid_meta_trns.csv")
 grid_meta_trns %>% write.csv(path, row.names=FALSE, quote=FALSE)
 
 # joining transformed grid_meta with the training labels
-train_data <- merge(train_labels, grid_meta_trns, by = 'grid_id')
+train_data <- merge(train_labels, grid_meta_trns, by = "grid_id")
 
 # creating sample predictor
 train_data$month <- substr(train_data$datetime, 6, 7)
@@ -62,5 +60,6 @@ summary(initial_mod)
 
 
 # saving data
-path <- ("~/repositories/public_sonbox/or568_term_project/data/train_data.csv")
-train_data %>% write.csv(path, row.names=FALSE, quote=FALSE)
+path <- ("C:/Users/15714/Documents/repositories/or568_no2_prediction/data/train_data.csv")
+
+write.csv(train_data, path)#, row.names=FALSE)
