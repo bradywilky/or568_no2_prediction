@@ -7,11 +7,12 @@ get.omi.datapath <- function(year, month, day) {
 
 # looking for grid ID to get associated latitude/longitude
 # Exploring data
+library(ncdf4)
 data <- nc_open(get.omi.datapath('2020', '07', '01'))
 
 library(sf)
 library(mapview)
-setwd("~/repositories/or568_no2_prediction")
+setwd("~/repositories/public_sonbox/or568_term_project")
 
 grid.metadata <- read.csv('data/grid_metadata.csv')
 la_grid <- grid.metadata[grid.metadata$location == 'Los Angeles (SoCAB)',]

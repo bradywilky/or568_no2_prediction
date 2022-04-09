@@ -106,8 +106,8 @@ tp_cell <- get_closest_cell(df, tp_coor)
 # 1 Jan 2019 and 31 Oct 2020
 
 # instantiating vectors to later use as columns for df
-no2_closest_loc <- data.frame(matrix(ncol = 4, nrow = 0))
-colnames(no2_closest_loc) <- c('date', 'loc', 'lat', 'long', 'vcd_no2')
+no2_closest_loc <- data.frame(matrix(ncol = 5, nrow = 0))
+colnames(no2_closest_loc) <- c('date', 'location', 'lat', 'long', 'vcd_no2')
 
 # iterating through days of available data
 for(yr in c("2019", "2020")){
@@ -135,21 +135,21 @@ for(yr in c("2019", "2020")){
         vcd_no2 <- get.no2.colvals(yr, m, d)[get_closest_cell_idx(la_cell)]
         date <- paste(yr, m, d)
         
-        n.row <- c(date, 'los angeles', la_cell$latitude, la_cell$longitude, vcd_no2)
+        n.row <- c(date, 'Los Angeles', la_cell$latitude, la_cell$longitude, vcd_no2)
         no2_closest_loc[nrow(no2_closest_loc) + 1,] <- n.row
         
         # nd
         vcd_no2 <- get.no2.colvals(yr, m, d)[get_closest_cell_idx(nd_cell)]
         date <- paste(yr, m, d)
         
-        n.row <- c(date, 'new delhi', nd_cell$latitude, nd_cell$longitude, vcd_no2)
+        n.row <- c(date, 'Delhi', nd_cell$latitude, nd_cell$longitude, vcd_no2)
         no2_closest_loc[nrow(no2_closest_loc) + 1,] <- n.row
         
         # tp
         vcd_no2 <- get.no2.colvals(yr, m, d)[get_closest_cell_idx(tp_cell)]
         date <- paste(yr, m, d)
         
-        n.row <- c(date, 'taipei', tp_cell$latitude, tp_cell$longitude, vcd_no2)
+        n.row <- c(date, 'Taipei', tp_cell$latitude, tp_cell$longitude, vcd_no2)
         no2_closest_loc[nrow(no2_closest_loc) + 1,] <- n.row        
       }
       if (paste(yr, m, d) == "2020 11 01"){break}
@@ -160,4 +160,6 @@ for(yr in c("2019", "2020")){
   if (paste(yr, m, d) == "2020 11 01"){break}
 }
 
-no2_closest_loc
+# saving data
+path <- ("C:/Users/15714/Documents/repositories/or568_no2_prediction/data/sat_vcd_data.csv")
+write.csv(no2_closest_loc, path)
