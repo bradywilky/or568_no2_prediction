@@ -2,7 +2,7 @@
 library(dplyr) # data manipulation, also includes the operator %>%
 library(magrittr) # explicit import to work around error with dplyr
 library(stringr) # for various character vector operations
-
+library(glmnet) # LASSO and ridge models
 # required data for this script:
 #   train_labels.csv (download)
 #   grid_metadata.csv (download)
@@ -200,8 +200,47 @@ row.number <- sample(1:nrow(new_training_data), 0.8*nrow(new_training_data))
 train = new_training_data[row.number,]
 test = new_training_data[-row.number,]
 
-# creating model with all predictors
-initial_mod <- lm(value~., train)
-summary(initial_mod)
-
 # now that our data is set, we can explore other models
+x.tr <- train %>% subset(select=-value)
+y.tr <- train$value
+x.te <- test %>% subset(select=-value)
+y.te <- test$value
+
+# creating model with all predictors
+lmod <- lm(value~., train)
+lm.pred <- predict(lmod, newdata = x.te)
+
+# Neural network
+nnetGrid <- expand.grid(.decay = c(0, 0.01, .1),
+                        .size = c(1:10), .bag = FALSE)
+
+nnet <- train(x.tr, y.tr,
+              method = "avNNet",
+              tuneGrid = nnetGrid,
+              preProc = c("center", "scale"),
+              linout = TRUE,
+              trace = FALSE,
+              MaxNWts = 10 * (ncol(x.tr) + 1) + 10 + 1,
+              maxit = 500)
+nnet.pred <- predict(nnet, newdata = x.te)
+
+# lasso
+# training models searching for optimal alpha
+lasso_cv <- cv.glmnet(data.matrix(x.tr), y.tr, alpha = 1)
+
+#find optimal lambda to minimize test MSE
+best_lambda <- lasso_cv$lambda.min
+lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+lasso.pred <- predict(lasso, newdata = x.te)
+
+# ridge
+ridge <- cv.glmnet(data.matrix(x.tr), y.tr, alpha = 0)
+best_lambda <- ridge$lambda.min
+ridge <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+ridge.pred <- predict(ridge, newdata = x.te)
+
+# evaluation
+postResample(pred = lm.pred, obs = y.te)
+postResample(pred = nnet.pred, obs = y.te)
+postResample(pred = ridge.pred, obs = y.te)
+postResample(pred = lasso.pred, obs = y.te)
