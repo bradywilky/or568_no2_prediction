@@ -118,13 +118,13 @@ test = train_data_nolab[-row.number,]
 # creating model with all predictors
 initial_mod <- lm(value~., train)
 summary(initial_mod)
-plot(initial_mod)
+#plot(initial_mod)
 
 # creating model with only nonzero NO2 label values
 nonzero_train <- train[train$value > 0,]
 nonzero_mod <- lm(log(value)~., nonzero_train)
 summary(nonzero_mod)
-plot(nonzero_mod)
+#plot(nonzero_mod)
 
 # looking for outliers to handle
 t <- data.frame(
@@ -143,11 +143,65 @@ nrow(res_150)
 
 aggregate(data.frame(count=res_100$loc), list(value=res_100$loc), length)
 # all of the high residual predictions come from Delhi. Two solutions will be
-# attempted:
-#  - removing entries with residual values greater than 150
+# attempting:
+#  - removing top X outliers
 #  - removing Delhi from the scope of the problem to see how the model performs
 
-anti_join(table1, table2, by=c("state", "county"))
 
-# grouping by "monthweek_location"
-# SQL mean group by month week location
+## Anti-joining on outliers to see how results are with new dataframe
+boxplot.stats(train_data_nolab$value)$out
+# many points fall outside of the boxplot, likely due to the skew.
+
+# Looking at outliers with top percentiles. The top 99.95% of values will be removed
+top_percentile <- 0.9995
+cutoff <- quantile(train_data_nolab$value, top_percentile)
+train_data_nolab[abs(train_data_nolab$value) > cutoff,] %>% nrow()
+
+# grabbing rows only under the cutoff
+train_data_nolab_outliers <- train_data_nolab[abs(train_data_nolab$value) > cutoff,]
+
+# anti-joining to filter out outliers (tdnno = train_data_nolab_no_outliers)
+tdnno <- anti_join(
+  train_data_nolab, train_data_nolab_outliers, by=c("location", "date"))
+
+# splitting the new data into train and test
+row.number <- sample(1:nrow(tdnno), 0.8*nrow(tdnno))
+train = tdnno[row.number,]
+test = tdnno[-row.number,]
+
+# creating model with all predictors
+initial_mod <- lm(value~., train)
+summary(initial_mod)
+
+# One assumption of regression is that the samples are independent. As pointed out
+# by Dr. Xu, this data would be better fit for a time series. However, Dr. Xu has
+# advised to group the data by week or month to mitigate the assumption violation.
+
+# Creating temporary column to group by. Need to aggregate data by week and cell
+# location and get mean values.
+tdnno$week_month_cell <- paste(
+  substr(tdnno$date,1,7)
+  , tdnno$mid_lat
+  , tdnno$mid_lon
+)
+
+grouped_df <- aggregate(tdnno[, c("vcd_no2", "value")], list(tdnno$week_month_cell), mean)
+names(grouped_df)[names(grouped_df) == "Group.1"] <- "week_month_cell"
+
+add_cols <- tdnno[, c("location", "month", "mid_lat_sc", "mid_lon_sc", "week_month_cell")] %>% distinct()
+new_training_data <- merge(grouped_df, add_cols, by = "week_month_cell") %>% subset(select=-week_month_cell)
+
+# saving data
+path <- ("C:/Users/15714/Documents/repositories/or568_no2_prediction/data/grouped_train_data.csv")
+write.csv(new_training_data, path)
+
+# splitting the new data into train and test
+row.number <- sample(1:nrow(new_training_data), 0.8*nrow(new_training_data))
+train = new_training_data[row.number,]
+test = new_training_data[-row.number,]
+
+# creating model with all predictors
+initial_mod <- lm(value~., train)
+summary(initial_mod)
+
+# now that our data is set, we can explore other models
