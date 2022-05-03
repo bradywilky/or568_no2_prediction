@@ -107,7 +107,7 @@ tp_cell <- get_closest_cell(df, tp_coor)
 
 # instantiating vectors to later use as columns for df
 no2_closest_loc <- data.frame(matrix(ncol = 5, nrow = 0))
-colnames(no2_closest_loc) <- c('date', 'location', 'lat', 'long', 'vcd_no2')
+colnames(no2_closest_loc) <- c('date', 'location', 'satellite_grid_lat', 'satellite_grid_long', 'vcd_no2')
 
 # iterating through days of available data
 for(yr in c("2019", "2020")){
