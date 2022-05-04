@@ -3,6 +3,8 @@ library(dplyr) # data manipulation, also includes the operator %>%
 library(magrittr) # explicit import to work around error with dplyr
 library(stringr) # for various character vector operations
 library(glmnet) # LASSO and ridge models
+library(caret) # general train() for avNNet
+
 # required data for this script:
 #   train_labels.csv (download)
 #   grid_metadata.csv (download)
@@ -230,17 +232,24 @@ lasso_cv <- cv.glmnet(data.matrix(x.tr), y.tr, alpha = 1)
 
 #find optimal lambda to minimize test MSE
 best_lambda <- lasso_cv$lambda.min
-lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
-lasso.pred <- predict(lasso, newdata = x.te)
+lasso <- glmnet(x.tr, y.tr, alpha = 1, lambda = best_lambda)
+lasso.pred <- predict(lasso, newx = data.matrix(x.te))
 
 # ridge
 ridge <- cv.glmnet(data.matrix(x.tr), y.tr, alpha = 0)
 best_lambda <- ridge$lambda.min
-ridge <- glmnet(x, y, alpha = 1, lambda = best_lambda)
-ridge.pred <- predict(ridge, newdata = x.te)
+ridge <- glmnet(x.tr, y.tr, alpha = 0, lambda = best_lambda)
+ridge.pred <- predict(ridge, newx = data.matrix(x.te))
 
 # evaluation
 postResample(pred = lm.pred, obs = y.te)
 postResample(pred = nnet.pred, obs = y.te)
 postResample(pred = ridge.pred, obs = y.te)
 postResample(pred = lasso.pred, obs = y.te)
+
+
+install.packages("rmarkdown")
+# TODO:
+# r markdown
+# extract sd from models
+# try to find predictor importance for regression
